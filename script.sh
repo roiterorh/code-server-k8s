@@ -23,6 +23,6 @@ users:
   user:
     token: ${TOKEN}
 EOL
-chmod 644 /home/coder/.kube/config
+chmod 400 /home/coder/.kube/config
 
 dumb-init fixuid -q code-server --bind-addr 0.0.0.0:8080 --disable-telemetry --disable-update-check --auth none .
