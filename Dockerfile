@@ -13,8 +13,8 @@ FROM alpine
 
 # RUN chsh -s /bin/bash
 # ENV SHELL=/bin/bash
-RUN apk add curl sudo wget bash-completion bash tar npm alpine-sdk bash libstdc++ libc6-compat
-RUN npm config set python python3
+RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat
+# RUN npm config set python python3
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 
 
