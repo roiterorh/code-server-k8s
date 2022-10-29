@@ -17,6 +17,7 @@ RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ li
 # RUN npm config set python python3
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 
+# PATH="$(npm bin -g):$PATH"
 
 # RUN ARCH=amd64 && \
 #     curl -sSL "https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
