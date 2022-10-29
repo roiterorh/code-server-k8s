@@ -3,10 +3,8 @@ FROM node:16-alpine as base
 ARG HELM_VERSION=v3.7.0
 ARG CODE_VERSION=4.8.1
 
-RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat python3 dumb-init nodejs gcompat py3-keyring
-RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method standalone --prefix=/usr/local
-
-
+RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat python3 dumb-init nodejs gcompat py3-keyring ncurses 
+RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method standalone --prefix=/usr/local --version=$CODE_VERSION
 
 RUN ARCH=amd64 && \
     curl -sSL "https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
@@ -15,33 +13,19 @@ RUN ARCH=amd64 && \
     mkdir -p /etc/fixuid && \
     printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
 
-
-## kubectl
 RUN curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl --output /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl
 
-## helm
 RUN mkdir /tmp/helm && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar -C /tmp/helm -xz && \
     chmod +x /tmp/helm/linux-amd64/helm && \
     mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && \
     rm -r /tmp/helm
 
-# kubectx/kubens/fzf
-RUN git clone https://github.com/ahmetb/kubectx /opt/kubectx && \
-    ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx && \
-    ln -s /opt/kubectx/kubens /usr/local/bin/kubens && \
-    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
-    ~/.fzf/install
+# ENV LC_ALL=en_US.UTF-8 \
+#     LANG=en_US.UTF-8 \
+#     LANGUAGE=en_US.UTF-8
 
-# RUN locale-gen en_US.UTF-8
-# We unfortunately cannot use update-locale because docker will not use the env variables
-# configured in /etc/default/locale so we need to set it manually.
-ENV LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8
-
-## User account
 RUN adduser --disabled-password --gecos '' coder && \
     addgroup sudo && \
     adduser coder sudo && \
@@ -52,8 +36,6 @@ RUN chmod g+rw /home && \
     chown -R coder:coder /home/coder && \
     chown -R coder:coder /home/coder/workspace;
 
-# RUN npm install -g @microsoft/1ds-core-js minimist yauzl yazl spdlog
-
 USER coder
 
 
@@ -63,21 +45,31 @@ RUN code-server \
     --install-extension ipedrazas.kubernetes-snippets \
     --install-extension equinusocio.vsc-material-theme-icons \
     --install-extension Equinusocio.vsc-material-theme 
-# RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
-#         ~/.fzf/install
-RUN echo "source <(kubectl completion bash)" >> /home/coder/.bashrc && \
-    echo "source <(helm completion bash)" >> /home/coder/.bashrc && \
-    echo 'export PS1="\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /home/coder/.bashrc
+
+RUN git clone --depth=1 https://github.com/Bash-it/bash-it.git ~/.bash_it
+RUN   ~/.bash_it/install.sh --silent
 
 COPY --chown=coder:coder settings.json /home/coder/.local/share/code-server/Machine/settings.json
-EXPOSE 8080
+COPY --chown=coder:coder .bashrc /home/coder/.bashrc
+
 
 USER root
 COPY script.sh /script.sh
 RUN chmod +x /script.sh
+RUN apk add tzdata &&\
+cp /usr/share/zoneinfo/Europe/Brussels /etc/localtime && \
+echo "Europe/Brussels" >  /etc/timezone &&\
+apk del tzdata
+
 
 USER coder
-RUN mkdir /home/coder/project
-WORKDIR /home/coder/project
+WORKDIR /home/coder/.bash_it
+RUN cp aliases/available/curl.aliases.bash aliases/available/git.aliases.bash aliases/available/kubectl.aliases.bash enabled 
+RUN cp completion/available/dirs.completion.bash completion/available/git.completion.bash completion/available/helm.completion.bash completion/available/kubectl.completion.bash completion/available/pip3.completion.bash enabled 
+RUN cp plugins/available/dirs.plugin.bash plugins/available/git.plugin.bash plugins/available/history.plugin.bash plugins/available/history-search.plugin.bash plugins/available/python.plugin.bash plugins/available/sudo.plugin.bash enabled
+
+EXPOSE 8080
+
+WORKDIR /home/coder/workspace
 
 CMD ["/script.sh"]
