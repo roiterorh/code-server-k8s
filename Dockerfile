@@ -3,7 +3,8 @@ FROM node:16-alpine as base
 ARG HELM_VERSION=v3.7.0
 ARG CODE_VERSION=4.8.1
 
-RUN apk add curl sudo wget bash-completion bash tar alpine-sdk libstdc++ libc6-compat python3 dumb-init nodejs gcompat py3-keyring ncurses 
+RUN apk update &&\
+    apk add --no-cache curl sudo wget bash-completion bash tar alpine-sdk libstdc++ libc6-compat python3 dumb-init nodejs gcompat py3-keyring ncurses shadow
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method standalone --prefix=/usr/local --version=$CODE_VERSION
 
 RUN ARCH=amd64 && \
@@ -32,9 +33,14 @@ RUN chmod g+rw /home && \
     chown -R coder:coder /home/coder && \
     chown -R coder:coder /home/coder/workspace;
 
+COPY script.sh /script.sh
+RUN chmod +x /script.sh
+RUN apk add tzdata &&\
+cp /usr/share/zoneinfo/Europe/Brussels /etc/localtime && \
+echo "Europe/Brussels" >  /etc/timezone &&\
+apk del tzdata
+
 USER coder
-
-
 RUN code-server \
     --install-extension ms-kubernetes-tools.vscode-kubernetes-tools \
     --install-extension tumido.crd-snippets \
@@ -49,18 +55,9 @@ COPY --chown=coder:coder settings.json /home/coder/.local/share/code-server/Mach
 COPY --chown=coder:coder .bashrc /home/coder/.bashrc
 
 
-USER root
-COPY script.sh /script.sh
-RUN chmod +x /script.sh
-RUN apk add tzdata &&\
-cp /usr/share/zoneinfo/Europe/Brussels /etc/localtime && \
-echo "Europe/Brussels" >  /etc/timezone &&\
-apk del tzdata
-RUN apk add libuser &&\
-mkdir /etc/default &&\
-touch /etc/default/useradd /etc/login.defs
+RUN sudo passwd -d coder &&\
+    chsh -s $(which bash)
 
-USER coder
 WORKDIR /home/coder/.bash_it
 RUN cp aliases/available/curl.aliases.bash aliases/available/git.aliases.bash aliases/available/kubectl.aliases.bash enabled 
 RUN cp completion/available/dirs.completion.bash completion/available/git.completion.bash completion/available/helm.completion.bash completion/available/kubectl.completion.bash completion/available/pip3.completion.bash enabled 
