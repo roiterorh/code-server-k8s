@@ -22,10 +22,6 @@ RUN mkdir /tmp/helm && \
     mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && \
     rm -r /tmp/helm
 
-# ENV LC_ALL=en_US.UTF-8 \
-#     LANG=en_US.UTF-8 \
-#     LANGUAGE=en_US.UTF-8
-
 RUN adduser --disabled-password --gecos '' coder && \
     addgroup sudo && \
     adduser coder sudo && \
@@ -60,7 +56,10 @@ RUN apk add tzdata &&\
 cp /usr/share/zoneinfo/Europe/Brussels /etc/localtime && \
 echo "Europe/Brussels" >  /etc/timezone &&\
 apk del tzdata
-
+RUN apk add libuser \
+touch /etc/login.defs \
+mkdir /etc/default \
+touch /etc/default/useradd 
 
 USER coder
 WORKDIR /home/coder/.bash_it
