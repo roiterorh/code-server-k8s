@@ -56,10 +56,9 @@ RUN apk add tzdata &&\
 cp /usr/share/zoneinfo/Europe/Brussels /etc/localtime && \
 echo "Europe/Brussels" >  /etc/timezone &&\
 apk del tzdata
-RUN apk add libuser \
-touch /etc/login.defs \
-mkdir /etc/default \
-touch /etc/default/useradd 
+RUN apk add libuser &&\
+mkdir /etc/default &&\
+touch /etc/default/useradd /etc/login.defs
 
 USER coder
 WORKDIR /home/coder/.bash_it
