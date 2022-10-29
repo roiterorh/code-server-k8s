@@ -15,7 +15,7 @@ FROM alpine
 # ENV SHELL=/bin/bash
 RUN apk add curl sudo wget bash-completion bash tar npm alpine-sdk bash libstdc++ libc6-compat
 RUN npm config set python python3
-RUN npm install --global code-server --unsafe-perm
+RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 
 
 # RUN ARCH=amd64 && \
