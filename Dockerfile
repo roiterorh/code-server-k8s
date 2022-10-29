@@ -53,9 +53,10 @@ ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
 
-
+RUN groups
 ## User account
 RUN adduser --disabled-password --gecos '' coder && \
+    addgroup sudo && \
     adduser coder sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers;
 
@@ -63,6 +64,9 @@ RUN chmod g+rw /home && \
     mkdir -p /home/coder/workspace && \
     chown -R coder:coder /home/coder && \
     chown -R coder:coder /home/coder/workspace;
+
+RUN npm install -g @microsoft/1ds-core-js minimist yauzl yazl spdlog
+
 USER coder
 # RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
 #         ~/.fzf/install
@@ -70,11 +74,12 @@ RUN echo "source <(kubectl completion bash)" >> /home/coder/.bashrc && \
     echo "source <(helm completion bash)" >> /home/coder/.bashrc && \
     echo 'export PS1="\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /home/coder/.bashrc
 
-RUN /usr/bin/code-server  --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
-RUN /usr/bin/code-server  --install-extension tumido.crd-snippets
-RUN /usr/bin/code-server  --install-extension ipedrazas.kubernetes-snippets
-RUN /usr/bin/code-server  --install-extension equinusocio.vsc-material-theme-icons
-RUN /usr/bin/code-server  --install-extension Equinusocio.vsc-material-theme
+RUN code-server \
+    --install-extension ms-kubernetes-tools.vscode-kubernetes-tools \
+    --install-extension tumido.crd-snippets \
+    --install-extension ipedrazas.kubernetes-snippets \
+    --install-extension equinusocio.vsc-material-theme-icons \
+    --install-extension Equinusocio.vsc-material-theme
 COPY --chown=coder:coder settings.json /home/coder/.local/share/code-server/User/settings.json
 EXPOSE 8080
 
