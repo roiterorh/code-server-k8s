@@ -1,5 +1,4 @@
-FROM node:16-
-alpine
+FROM node:16-alpine
 # RUN apt-get update && apt-get install -y \
 #     openssl \
 #     net-tools \
