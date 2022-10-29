@@ -18,7 +18,7 @@ RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ li
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 
 
-FROM alpine
+FROM node:16-alpine
 COPY --from=base /usr/local/bin/code-server /usr/local/bin/code-server
 
 RUN code-server  --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
