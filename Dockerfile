@@ -1,4 +1,5 @@
-FROM node:16-alpine
+FROM node:16-
+alpine
 # RUN apt-get update && apt-get install -y \
 #     openssl \
 #     net-tools \
@@ -13,7 +14,7 @@ FROM node:16-alpine
 
 # RUN chsh -s /bin/bash
 # ENV SHELL=/bin/bash
-RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat
+RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat python3
 # RUN npm config set python python3
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 
