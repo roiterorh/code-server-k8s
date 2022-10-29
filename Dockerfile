@@ -1,23 +1,11 @@
 FROM node:16-alpine as base
 
 ARG HELM_VERSION=v3.7.0
-# RUN apt-get update && apt-get install -y \
-#     openssl \
-#     net-tools \
-#     git \
-#     locales \
-#     sudo \
-#     dumb-init \
-#     vim \
-#     curl \
-#     wget \
-#     bash-completion
+ARG CODE_VERSION=4.8.1
 
-# RUN chsh -s /bin/bash
-# ENV SHELL=/bin/bash
-RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat python3 dumb-init
-# RUN npm config set python python3
-RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
+RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat python3 dumb-init nodejs gcompat py3-keyring
+RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method standalone --prefix=/usr/local
+
 
 
 RUN ARCH=amd64 && \
@@ -53,7 +41,6 @@ ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
 
-RUN groups
 ## User account
 RUN adduser --disabled-password --gecos '' coder && \
     addgroup sudo && \
@@ -65,22 +52,24 @@ RUN chmod g+rw /home && \
     chown -R coder:coder /home/coder && \
     chown -R coder:coder /home/coder/workspace;
 
-RUN npm install -g @microsoft/1ds-core-js minimist yauzl yazl spdlog
+# RUN npm install -g @microsoft/1ds-core-js minimist yauzl yazl spdlog
 
 USER coder
-# RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
-#         ~/.fzf/install
-RUN echo "source <(kubectl completion bash)" >> /home/coder/.bashrc && \
-    echo "source <(helm completion bash)" >> /home/coder/.bashrc && \
-    echo 'export PS1="\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /home/coder/.bashrc
+
 
 RUN code-server \
     --install-extension ms-kubernetes-tools.vscode-kubernetes-tools \
     --install-extension tumido.crd-snippets \
     --install-extension ipedrazas.kubernetes-snippets \
     --install-extension equinusocio.vsc-material-theme-icons \
-    --install-extension Equinusocio.vsc-material-theme
-COPY --chown=coder:coder settings.json /home/coder/.local/share/code-server/User/settings.json
+    --install-extension Equinusocio.vsc-material-theme 
+# RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
+#         ~/.fzf/install
+RUN echo "source <(kubectl completion bash)" >> /home/coder/.bashrc && \
+    echo "source <(helm completion bash)" >> /home/coder/.bashrc && \
+    echo 'export PS1="\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /home/coder/.bashrc
+
+COPY --chown=coder:coder settings.json /home/coder/.local/share/code-server/Machine/settings.json
 EXPOSE 8080
 
 USER root

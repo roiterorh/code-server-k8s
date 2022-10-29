@@ -25,4 +25,4 @@ users:
 EOL
 
 
-dumb-init fixuid -q code-server --bind-addr 0.0.0.0:8080 --auth none .
+dumb-init fixuid -q code-server --bind-addr 0.0.0.0:8080 --disable-telemetry --disable-update-check --auth none .
