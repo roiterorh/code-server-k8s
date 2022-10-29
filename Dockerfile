@@ -3,7 +3,7 @@ FROM node:16-alpine as base
 ARG HELM_VERSION=v3.7.0
 ARG CODE_VERSION=4.8.1
 
-RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ libc6-compat python3 dumb-init nodejs gcompat py3-keyring ncurses 
+RUN apk add curl sudo wget bash-completion bash tar alpine-sdk libstdc++ libc6-compat python3 dumb-init nodejs gcompat py3-keyring ncurses 
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method standalone --prefix=/usr/local --version=$CODE_VERSION
 
 RUN ARCH=amd64 && \

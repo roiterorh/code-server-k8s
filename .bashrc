@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
 unset MAILCHECK
 export BASH_IT="/home/coder/.bash_it"
 export SCM_CHECK=true
