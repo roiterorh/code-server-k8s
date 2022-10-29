@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:16-alpine as base
 # RUN apt-get update && apt-get install -y \
 #     openssl \
 #     net-tools \
@@ -17,7 +17,11 @@ RUN apk add curl sudo wget bash-completion bash tar alpine-sdk bash libstdc++ li
 # RUN npm config set python python3
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 
-# PATH="$(npm bin -g):$PATH"
+
+FROM alpine
+COPY --from=base /usr/local/bin/code-server /usr/local/bin/code-server
+
+RUN code-server  --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
 
 # RUN ARCH=amd64 && \
 #     curl -sSL "https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
@@ -25,16 +29,6 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 #     chmod 4755 /usr/local/bin/fixuid && \
 #     mkdir -p /etc/fixuid && \
 #     printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
-
-# run ls /opt/code-server
-# run /opt/code-server/install.sh
-# RUN CODE_SERVER_VERSION=4.8.1 && \
-#     mkdir /opt/code-server &&\
-#     curl -L https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-linux-amd64.tar.gz | tar -xz -C /opt/code-server  --strip-components 1
-# ENV PATH="${PATH}:/opt/code-server/bin"
-
-# RUN ls /opt/code-server
-    # sudo dpkg -i code-server_${CODE_SERVER_VERSION}_amd64.deb
 
 
 # ## kubectl
@@ -73,8 +67,8 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh -s --
 #     chown -R coder:coder /home/coder && \
 #     chown -R coder:coder /home/coder/workspace;
 # USER coder
-# RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
-#         ~/.fzf/install
+# # RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
+# #         ~/.fzf/install
 # RUN echo "source <(kubectl completion bash)" >> /home/coder/.bashrc && \
 #     echo "source <(helm completion bash)" >> /home/coder/.bashrc && \
 #     echo 'export PS1="\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /home/coder/.bashrc
